@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category,db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -16,7 +16,7 @@ def create_app(test_config=None):
   '''
   @DONE: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
-  CORS(app, resources={r"*/*": {origins: '*'}})
+  CORS(app, resources={r"/*": {'origins': '*'}})
   
 
   '''
@@ -29,12 +29,44 @@ def create_app(test_config=None):
       return response
 
   '''
-  @TODO: 
+  @DONE: 
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
+  @app.route('/categories')
+  def get_categories():
+      selection = Category.query.order_by(Category.id).all()
 
+      total_size = len(selection)
 
+      if total_size==0:
+          abort(404)
+      return jsonify({
+        "success": True,
+        "categories": [cat.type for cat in selection ]
+      })
+
+  # @app.route('/categories/create/debug-only')
+  # def c_categories():
+  #     cats = Category.query.all()
+  #     for cat in cats:
+  #       db.session.delete(cat)
+  #     db.session.commit()
+  #     cat1 = Category(type = "cat1")
+  #     cat2 = Category(type = "cat2")
+  #     cat3 = Category(type = "cat3")
+  #     cat4 = Category(type = "cat4")
+  #     cat5 = Category(type = "cat5")
+  #     cat6 = Category(type = "cat6")
+  #     db.session.add(cat1)
+  #     db.session.add(cat2)
+  #     db.session.add(cat3)
+  #     db.session.add(cat4)
+  #     db.session.add(cat5)
+  #     db.session.add(cat6)
+  #     db.session.commit()
+  #     return 'done'
+      
   '''
   @TODO: 
   Create an endpoint to handle GET requests for questions, 

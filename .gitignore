@@ -35,3 +35,5 @@ Thumbs.db
 
 # python
 *.pyc
+
+frontend/node_modules/
