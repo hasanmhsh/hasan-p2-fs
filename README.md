@@ -1,44 +1,250 @@
-# Full Stack API Final Project
+# The Quiz project (trivia)
 
-## Full Stack Trivia
+This project is a quizz project which provide a way to test individuals by providing a platform of categorized questions and provide a way to add them and create exams with categorized or non-categorized and randomized questions with no repetetions, every question is consists of categor and question and answer and difficulty , Fullstack platform structure contain a number of endpoints which used by front end app to query or manipulate database in an specefied demand. 
 
-Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created a  webpage to manage the trivia app and play the game, but their API experience is limited and still needs to be built out. 
+All backend code follows [PEP8 style guidelines](https://www.python.org/dev/peps/pep-0008/). 
 
-That's where you come in! Help them finish the trivia app so they can start holding trivia and seeing who's the most knowledgeable of the bunch. The application must:
 
-1) Display questions - both all questions and by category. Questions should show the question, category and difficulty rating by default and can show/hide the answer. 
-2) Delete questions.
-3) Add questions and require that they include question and answer text.
-4) Search for questions based on a text query string.
-5) Play the quiz game, randomizing either all questions or within a specific category. 
+## Getting Started
 
-Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others. 
+### Pre-requisites and Local Development 
+Developers who will use this project must have Python3 and pip and node installed on their workstations.
 
-## Tasks
+#### Backend
 
-There are `TODO` comments throughout project. Start by reading the READMEs in:
+First you must install back end dependence , in backend folder type this command in shell
+`pip install requirements.txt`
 
-1. [`./frontend/`](./frontend/README.md)
-2. [`./backend/`](./backend/README.md)
+To run the app execute the following command
+```
+export FLASK_APP=flaskr
+export FLASK_ENV=development
+flask run
+```
 
-We recommend following the instructions in those files in order. This order will look familiar from our prior work in the course.
+These commands setup the application in development mode and use `__init__.py` 
 
-## Starting and Submitting the Project
+application is running on `http://127.0.0.1:5000/` by default and is a proxy on the frontend settings. 
 
-[Fork](https://help.github.com/en/articles/fork-a-repo) the [project repository]() and [Clone](https://help.github.com/en/articles/cloning-a-repository) your forked repository to your machine. Work on the project locally and make sure to push all your changes to the remote repository before submitting the link to your repository in the Classroom. 
+#### Frontend
 
-## About the Stack
+Execute the following commands in the frontend folder: 
+```
+npm install // once
+npm start 
+```
 
-We started the full stack application for you. It is desiged with some key functional areas:
+The frontend is running on localhost:3000. 
 
-### Backend
+### Tests
+To run tests change directory to 'backend' folder then execute the following commands: 
 
-The `./backend` directory contains a partially completed Flask and SQLAlchemy server. You will work primarily in app.py to define your endpoints and can reference models.py for DB and SQLAlchemy setup. 
+```
+dropdb trivia_test
+createdb trivia_test
+psql trivia_test < questions.psql
+python test_flaskr.py
+```
 
-### Frontend
+First time neglect dropdb command. 
 
-The `./frontend` directory contains a complete React frontend to consume the data from the Flask server. You will need to update the endpoints after you define them in the backend. Those areas are marked with TODO and can be searched for expediency. 
+## API Reference
 
-Pay special attention to what data the frontend is expecting from each API response to help guide how you format your API. 
+### Getting Started
+- Base URL: backend app is running by default on this endpoint, `http://127.0.0.1:5000/`, which is s proxy in the frontend settings. 
 
-[View the README.md within ./frontend for more details.](./frontend/README.md)
+
+### Error Handling
+Errors are issued in JSON format as following:
+```
+{
+    "success": False, 
+    "error": 400,
+    "message": "bad request"
+}
+```
+API will issue three error types at failure:
+- 400: Bad Request
+- 404: Resource Not Found
+- 422: Not Processable 
+
+### Endpoints 
+#### GET /categories
+- General:
+    - Returns a list of categories objects, success value, and total number of questions
+- Sample: `curl http://127.0.0.1:5000/categories`
+``` 
+{
+  "categories": [
+    {
+      "type": "Geography",
+      "id": 1
+    },
+    {
+      "type": "History",
+      "id": 1
+    }
+  ],
+"success": true
+}
+```
+
+#### GET /questions
+- General:
+    - Returns a list of questions objects, success value, and total number of questions
+    - Results are paginated in groups of 10. Include a request argument to choose page number, starting from 1. 
+- Sample: `curl http://127.0.0.1:5000/questions`
+
+``` 
+{
+  "questions": [
+    {
+      "question": "where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    },
+    {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    },
+    {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    },
+    {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    }
+  ],
+"success": true,
+"total_questions": 45
+}
+```
+
+#### POST /questions
+- General:
+    - Creates a new question using the submitted question, answer, category and difficulty. Returns the id of the created question, success value, total questions, and question list based on current page number to update the frontend. 
+- `curl http://127.0.0.1:5000/questions?page=3 -X POST -H "Content-Type: application/json" -d '{"question":"What is your name?", "answer":"hhh", "category":"5", "difficulty": 4}'`
+```
+{
+  "questions": [
+    {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    }
+  ],
+  "created": 55,
+  "success": true,
+  "total_questions": 46
+}
+```
+
+#### POST /questions
+- General:
+    - Searches in questions with part of question ignoring case of letters. 
+- `curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm":"where"}`
+```
+{
+  "questions": [
+    {
+      "question": "where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    },
+    {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    },
+    {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    },
+    {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    }
+  ],
+"success": true,
+"total_questions": 45
+}
+
+```
+#### DELETE /questions/{book_id}
+- General:
+    - Deletes the question of the given ID if it exists. Returns the id of the deleted question, success value, total questions, and question list based on current page number to update the frontend. 
+- `curl -X DELETE http://127.0.0.1:5000/questions/16?page=2`
+```
+{
+  "questions": [
+    {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    },
+    {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+    }
+  ],
+  "deleted": 23,
+  "success": true,
+  "total_questions": 42
+}
+```
+#### POST /quizzes
+- General:
+    - Returns a question of required category or un categorized which is randomized with no repetetins
+- Sample: `curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"category":"1", "previous_questions":[2, 3, 4]}'`
+``` 
+{
+  "category": {
+  {
+    "type": "Geography",
+    "id": 1
+  },
+  "question": {
+      "question": "Where is athenes?",
+      "id": 1,
+      "answer": "greece",
+      "category": "Giography",
+      "difficulty": 3
+  },
+  "success": true
+}
+```
+
+## Authors
+Hasan
+
+## Acknowledgements 
+The awesome team at Udacity and all of the instructors, mentors and reviewers
