@@ -109,36 +109,61 @@ def create_app(test_config=None):
   @app.route('/questions/create/debug-only')
   def c_categories():
       questions = Question.query.all()
-      for q in questions:
-        db.session.delete(q)
-      db.session.commit()
-      Question(question="question1?", answer="answer1", category="cat1", difficulty=10).insert()
-      Question(question="question2?", answer="answer2", category="cat2", difficulty=20).insert()
-      Question(question="question3?", answer="answer3", category="cat3", difficulty=30).insert()
-      Question(question="question4?", answer="answer4", category="cat4", difficulty=40).insert()
-      Question(question="question5?", answer="answer5", category="cat5", difficulty=50).insert()
-      Question(question="question6?", answer="answer6", category="cat6", difficulty=60).insert()
-      Question(question="question7?", answer="answer7", category="cat1", difficulty=70).insert()
-      Question(question="question8?", answer="answer8", category="cat2", difficulty=80).insert()
-      Question(question="question9?", answer="answer9", category="cat3", difficulty=90).insert()
-      Question(question="question10?", answer="answer10", category="cat4", difficulty=100).insert()
-      Question(question="question11?", answer="answer11", category="cat5", difficulty=110).insert()
-      Question(question="question12?", answer="answer12", category="cat6", difficulty=120).insert()
-      Question(question="question13?", answer="answer13", category="cat1", difficulty=130).insert()
-      Question(question="question14?", answer="answer14", category="cat2", difficulty=140).insert()
-      Question(question="question15?", answer="answer15", category="cat3", difficulty=150).insert()
-      Question(question="question16?", answer="answer16", category="cat4", difficulty=160).insert()
-      Question(question="question17?", answer="answer17", category="cat5", difficulty=170).insert()
-      Question(question="question18?", answer="answer18", category="cat6", difficulty=180).insert()
+      # for q in questions:
+      #   db.session.delete(q)
+      # db.session.commit()
+      Question(question="question19?", answer="answer19", category="cat1", difficulty=10).insert()
+      Question(question="question20?", answer="answer20", category="cat2", difficulty=20).insert()
+      Question(question="question21?", answer="answer21", category="cat3", difficulty=30).insert()
+      Question(question="question22?", answer="answer22", category="cat4", difficulty=40).insert()
+      Question(question="question23?", answer="answer23", category="cat5", difficulty=50).insert()
+      Question(question="question24?", answer="answer24", category="cat6", difficulty=60).insert()
+      Question(question="question25?", answer="answer25", category="cat1", difficulty=70).insert()
+      Question(question="question26?", answer="answer26", category="cat2", difficulty=80).insert()
+      Question(question="question27?", answer="answer27", category="cat3", difficulty=90).insert()
+      Question(question="question28?", answer="answer28", category="cat4", difficulty=100).insert()
+      Question(question="question29?", answer="answer29", category="cat5", difficulty=110).insert()
+      Question(question="question30?", answer="answer30", category="cat6", difficulty=120).insert()
+      Question(question="question31?", answer="answer31", category="cat1", difficulty=130).insert()
+      Question(question="question32?", answer="answer32", category="cat2", difficulty=140).insert()
+      Question(question="question33?", answer="answer33", category="cat3", difficulty=150).insert()
+      Question(question="question34?", answer="answer34", category="cat4", difficulty=160).insert()
+      Question(question="question35?", answer="answer35", category="cat5", difficulty=170).insert()
+      Question(question="question36?", answer="answer36", category="cat6", difficulty=180).insert()
       return 'done'
     
   '''
-  @TODO: 
+  @DONE: 
   Create an endpoint to DELETE question using a question ID. 
 
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+  @app.route('/questions/<int:question_id>', methods=['DELETE'])
+  def delete_question(question_id):
+      success = True
+      returned = {}
+      try:
+          question = Question.query.filter(Question.id == question_id).one_or_none()
+          if question is None:
+              abort(404)
+          question.delete() 
+          selection = Question.query.order_by(Question.id).all()
+          current_questions = paginate_questions(request,selection)
+          returned["success"] = True
+          returned["deleted"] = question.id
+          returned["questions"] = current_questions
+          returned["total_questions"] = len(selection)
+      except:
+          success = False
+          Question.rollback()
+      # finally:
+          # Question.close()
+      if success:
+          return jsonify(returned)
+      else:
+          abort(422)
+
 
   '''
   @TODO: 
