@@ -156,7 +156,7 @@ def create_app(test_config=None):
           returned["total_questions"] = len(selection)
       except:
           success = False
-          Question.rollback()
+          # Question.rollback()
       # finally:
           # Question.close()
       if success:
@@ -166,7 +166,7 @@ def create_app(test_config=None):
 
 
   '''
-  @TODO: 
+  @DONE: 
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.
@@ -177,7 +177,7 @@ def create_app(test_config=None):
   '''
 
   '''
-  @TODO: 
+  @DONE: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
   is a substring of the question. 
@@ -186,6 +186,52 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
+  @app.route('/questions', methods=['POST'])
+  def create_book_from_json():
+      error = False
+      body = request.get_json()
+      new_question = body.get('question', None)
+      new_answer = body.get('answer', None)
+      new_category = body.get('category', None)
+      new_difficulty = body.get('difficulty', None)
+      search = body.get('searchTerm', None)
+      # return search
+      returned = {}
+
+
+      try:
+          if search: # is not None: #search
+              selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search)))
+              current_questions = paginate_questions(request,selection)
+              returned['success'] = True
+              returned['questions'] = current_questions
+              returned['total_questions'] = len(selection.all())
+          else: #create new question
+              question=Question(
+                  question=new_question,
+                  answer=new_answer,
+                  difficulty=new_difficulty,
+                  category=new_category
+              )
+              question.insert()
+
+              selection = Question.query.order_by(Question.id).all()
+              current_questions = paginate_questions(request,selection)
+              
+              returned["success"] = True
+              returned["created"] = question.id
+              returned["questions"] = current_questions
+              returned["total_questions"] = len(selection)
+      except:
+          error = True
+          # Question.rollback()
+          # print(sys.exc_info())
+      # finally:
+      #     Question.close()
+      if error:
+          abort(422)
+      else:
+          return jsonify(returned)
 
   '''
   @TODO: 
