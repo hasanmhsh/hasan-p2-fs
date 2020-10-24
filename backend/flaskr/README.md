@@ -224,7 +224,7 @@ API will issue three error types at failure:
 #### POST /quizzes
 - General:
     - Returns a question of required category or un categorized which is randomized with no repetetins
-- Sample: `curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"category":"1", "previous_questions":[2, 3, 4]}'`
+- Sample: `curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"category":{"type": "Gegraphy", "id": "1"}, "previous_questions":[2, 3, 4]}'`
 ``` 
 {
   "category": {

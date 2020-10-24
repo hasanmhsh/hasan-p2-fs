@@ -71,12 +71,13 @@ def create_app(test_config=None):
       current_questions = paginate_questions(request, selection)
       if len(current_questions)==0:
           abort(404)
+      category_types = [cat.type for cat in categories ]
       return jsonify({
         "success": True,
         "questions": current_questions,
         # "questions": [question.question for question in current_questions],
         "total_questions": total_size,
-        "categories": [cat.type for cat in categories ],
+        "categories": category_types,
         "current_category": -1
       })
 
@@ -153,6 +154,7 @@ def create_app(test_config=None):
       new_category = body.get('category', None)
       new_difficulty = body.get('difficulty', None)
       search = body.get('searchTerm', None)
+      test = body.get('test', None)
       # return search
       returned = {}
 
@@ -171,6 +173,8 @@ def create_app(test_config=None):
                   difficulty=new_difficulty,
                   category=new_category
               )
+              if test:
+                question.id = body.get('id')
               question.insert()
 
               selection = Question.query.order_by(Question.id).all()
@@ -240,27 +244,33 @@ def create_app(test_config=None):
       questions_to_return = []
       questions = []
       cat_index = int(quiz_category['id'])
+      question_to_return = {}
+      error = False
+      try:
+        if cat_index >= 0:
+          #there is category
+          cat_index += 1
+          questions = Question.query.filter(Question.category==str(cat_index)).order_by(func.random()).all()
+        else:
+          # all questions
+          questions = Question.query.order_by(func.random()).all()
 
+        # if len(questions)==0:
+        #   abort(404)
 
-      if cat_index >= 0:
-        #there is category
-        cat_index += 1
-        questions = Question.query.filter(Question.category==str(cat_index)).order_by(func.random()).all()
-      else:
-        # all questions
-        questions = Question.query.order_by(func.random()).all()
+        for q in questions:
+          if not q.id in previous_question_ids:
+            questions_to_return.append(q.format())
+        # quiz_category['question'] = questions_to_return[0]
+        # return jsonify(quiz_category)
+        question_to_return = questions_to_return[0]
+      except:
+        error = True
+        # abort(404)
 
-      if len(questions)==0:
-        abort(404)
-
-      for q in questions:
-        if not q.id in previous_question_ids:
-          questions_to_return.append(q.format())
-      # quiz_category['question'] = questions_to_return[0]
-      # return jsonify(quiz_category)
       return jsonify({
         "success": True,
-        "question": questions_to_return[0]
+        "question": question_to_return
       })
 
 
