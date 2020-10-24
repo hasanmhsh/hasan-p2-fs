@@ -47,26 +47,6 @@ def create_app(test_config=None):
         "categories": [cat.type for cat in selection ]
       })
 
-  # @app.route('/categories/create/debug-only')
-  # def c_categories():
-  #     cats = Category.query.all()
-  #     for cat in cats:
-  #       db.session.delete(cat)
-  #     db.session.commit()
-  #     cat1 = Category(type = "cat1")
-  #     cat2 = Category(type = "cat2")
-  #     cat3 = Category(type = "cat3")
-  #     cat4 = Category(type = "cat4")
-  #     cat5 = Category(type = "cat5")
-  #     cat6 = Category(type = "cat6")
-  #     db.session.add(cat1)
-  #     db.session.add(cat2)
-  #     db.session.add(cat3)
-  #     db.session.add(cat4)
-  #     db.session.add(cat5)
-  #     db.session.add(cat6)
-  #     db.session.commit()
-  #     return 'done'
       
   '''
   @DONE: 
@@ -89,6 +69,8 @@ def create_app(test_config=None):
       if total_size==0:
           abort(404)
       current_questions = paginate_questions(request, selection)
+      if len(current_questions)==0:
+          abort(404)
       return jsonify({
         "success": True,
         "questions": current_questions,
@@ -107,32 +89,7 @@ def create_app(test_config=None):
       return current_questions
       # return selection[start:end]
 
-  @app.route('/questions/create/debug-only')
-  def c_categories():
-      questions = Question.query.all()
-      # for q in questions:
-      #   db.session.delete(q)
-      # db.session.commit()
-      Question(question="question19?", answer="answer19", category="cat1", difficulty=10).insert()
-      Question(question="question20?", answer="answer20", category="cat2", difficulty=20).insert()
-      Question(question="question21?", answer="answer21", category="cat3", difficulty=30).insert()
-      Question(question="question22?", answer="answer22", category="cat4", difficulty=40).insert()
-      Question(question="question23?", answer="answer23", category="cat5", difficulty=50).insert()
-      Question(question="question24?", answer="answer24", category="cat6", difficulty=60).insert()
-      Question(question="question25?", answer="answer25", category="cat1", difficulty=70).insert()
-      Question(question="question26?", answer="answer26", category="cat2", difficulty=80).insert()
-      Question(question="question27?", answer="answer27", category="cat3", difficulty=90).insert()
-      Question(question="question28?", answer="answer28", category="cat4", difficulty=100).insert()
-      Question(question="question29?", answer="answer29", category="cat5", difficulty=110).insert()
-      Question(question="question30?", answer="answer30", category="cat6", difficulty=120).insert()
-      Question(question="question31?", answer="answer31", category="cat1", difficulty=130).insert()
-      Question(question="question32?", answer="answer32", category="cat2", difficulty=140).insert()
-      Question(question="question33?", answer="answer33", category="cat3", difficulty=150).insert()
-      Question(question="question34?", answer="answer34", category="cat4", difficulty=160).insert()
-      Question(question="question35?", answer="answer35", category="cat5", difficulty=170).insert()
-      Question(question="question36?", answer="answer36", category="cat6", difficulty=180).insert()
-      return 'done'
-    
+  
   '''
   @DONE: 
   Create an endpoint to DELETE question using a question ID. 
@@ -245,7 +202,7 @@ def create_app(test_config=None):
   @app.route('/categories/<int:category_order>/questions')
   def get_category_questions(category_order):
       categories = Category.query.order_by(Category.id).all()
-      selection = Question.query.filter(Question.category==str(category_order+1)).order_by(Question.id).all()
+      selection = Question.query.filter(Question.category==str(category_order)).order_by(Question.id).all()
       total_size = len(selection)
 
       if total_size==0:
@@ -278,16 +235,23 @@ def create_app(test_config=None):
       body = request.get_json()
       previous_question_ids = body.get('previous_questions', None)
       quiz_category = body.get('quiz_category', None)
-      categories = Category.query.order_by(Category.id).all()
+      # categories = Category.query.order_by(Category.id).all()
       # previous_question_ids = [q['id'] for q in previous_questions]
       questions_to_return = []
       questions = []
-      if quiz_category['type'] in [category.type for category in categories]:
+      cat_index = int(quiz_category['id'])
+
+
+      if cat_index >= 0:
         #there is category
-        questions = Question.query.filter(Question.category==quiz_category['type']).order_by(func.random()).all()
+        cat_index += 1
+        questions = Question.query.filter(Question.category==str(cat_index)).order_by(func.random()).all()
       else:
         # all questions
         questions = Question.query.order_by(func.random()).all()
+
+      if len(questions)==0:
+        abort(404)
 
       for q in questions:
         if not q.id in previous_question_ids:
@@ -295,6 +259,7 @@ def create_app(test_config=None):
       # quiz_category['question'] = questions_to_return[0]
       # return jsonify(quiz_category)
       return jsonify({
+        "success": True,
         "question": questions_to_return[0]
       })
 
@@ -306,36 +271,36 @@ def create_app(test_config=None):
   including 404 and 422. 
   '''
   @app.errorhandler(404)
-    def not_found(error):
-        return jsonify({
-            "success": False,
-            "error": 404,
-            "message": "resource not found",
-        }), 404
+  def not_found(error):
+      return jsonify({
+          "success": False,
+          "error": 404,
+          "message": "resource not found",
+      }), 404
 
-    @app.errorhandler(422)
-    def unprocessable(error):
-        return jsonify({
-            "success": False,
-            "error": 422,
-            "message": "unprocessable",
-        }), 422
+  @app.errorhandler(422)
+  def unprocessable(error):
+      return jsonify({
+          "success": False,
+          "error": 422,
+          "message": "unprocessable",
+      }), 422
 
-    @app.errorhandler(400)
-    def bad_request(error):
-        return jsonify({
-            "success": False,
-            "error": 400,
-            "message": "bad request",
-        }), 400
+  @app.errorhandler(400)
+  def bad_request(error):
+      return jsonify({
+        "success": False,
+          "error": 400,
+          "message": "bad request",
+      }), 400
 
-    @app.errorhandler(405)
-    def not_allowed(error):
-        return jsonify({
-            "success": False,
-            "error": 405,
-            "message": "method not allowed",
-        }), 405
+  @app.errorhandler(405)
+  def not_allowed(error):
+      return jsonify({
+          "success": False,
+          "error": 405,
+          "message": "method not allowed",
+      }), 405
   
   return app
 

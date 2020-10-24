@@ -10,7 +10,7 @@ class FormView extends Component {
       question: "",
       answer: "",
       difficulty: 1,
-      category: 1,
+      category: 0,
       categories: {}
     }
   }
@@ -49,6 +49,7 @@ class FormView extends Component {
       },
       crossDomain: true,
       success: (result) => {
+        this.setState({"category": 0})
         document.getElementById("add-question-form").reset();
         return;
       },
@@ -60,6 +61,8 @@ class FormView extends Component {
   }
 
   handleChange = (event) => {
+    // console.log(event.target.value)
+    // console.log(event.target.name)
     this.setState({[event.target.name]: event.target.value})
   }
 
