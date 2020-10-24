@@ -22,8 +22,51 @@ class QuestionView extends Component {
   }
 
   getQuestions = () => {
-    $.ajax({
+    if(this.state.currentCategory != null && this.state.currentCategory >=0)
+      this.getPaginatedCategorizedQuestions();
+    else
+      this.getPaginatedUnCategorizedQuestions();
+  }
+
+  // getQuestions = () => {
+  //   $.ajax({
+  //     url: `/questions?page=${this.state.page}`, //TODO: update request URL
+  //     type: "GET",
+  //     success: (result) => {
+  //       this.setState({
+  //         questions: result.questions,
+  //         totalQuestions: result.total_questions,
+  //         categories: result.categories,
+  //         currentCategory: result.current_category })
+  //       return;
+  //     },
+  //     error: (error) => {
+  //       alert('Unable to load questions. Please try your request again')
+  //       return;
+  //     }
+  //   })
+  // }
+
+  getPaginatedUnCategorizedQuestions = () => { $.ajax({
       url: `/questions?page=${this.state.page}`, //TODO: update request URL
+      type: "GET",
+      success: (result) => {
+        this.setState({
+          questions: result.questions,
+          totalQuestions: result.total_questions,
+          categories: result.categories,
+          currentCategory: result.current_category })
+        return;
+      },
+      error: (error) => {
+        alert('Unable to load questions. Please try your request again')
+        return;
+      }
+    })
+  }
+
+  getPaginatedCategorizedQuestions = () => {$.ajax({
+      url: `/categories/${this.state.currentCategory}/questions?page=${this.state.page}`, //TODO: update request URL
       type: "GET",
       success: (result) => {
         this.setState({

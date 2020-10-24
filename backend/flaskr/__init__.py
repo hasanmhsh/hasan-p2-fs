@@ -94,7 +94,7 @@ def create_app(test_config=None):
         # "questions": [question.question for question in current_questions],
         "total_questions": total_size,
         "categories": [cat.type for cat in categories ],
-        "current_category": current_questions[0]['category']
+        "current_category": -1
       })
 
   def paginate_questions(request, selection):
@@ -187,7 +187,7 @@ def create_app(test_config=None):
   Try using the word "title" to start. 
   '''
   @app.route('/questions', methods=['POST'])
-  def create_book_from_json():
+  def create_question_or_search():
       error = False
       body = request.get_json()
       new_question = body.get('question', None)
@@ -234,14 +234,31 @@ def create_app(test_config=None):
           return jsonify(returned)
 
   '''
-  @TODO: 
+  @DONE: 
   Create a GET endpoint to get questions based on category. 
 
   TEST: In the "List" tab / main screen, clicking on one of the 
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+  @app.route('/categories/<int:category_order>/questions')
+  def get_category_questions(category_order):
+      categories = Category.query.order_by(Category.id).all()
+      selection = Question.query.filter(Question.category==str(category_order+1)).order_by(Question.id).all()
+      total_size = len(selection)
 
+      if total_size==0:
+          abort(404)
+      current_questions = paginate_questions(request, selection)
+      return jsonify({
+        "success": True,
+        # "questions": [question.format() for question in selection],
+        "questions": current_questions,
+        # "questions": [question.question for question in current_questions],
+        "total_questions": str(total_size),
+        "categories": [cat.type for cat in categories ],
+        "current_category": category_order
+      })
 
   '''
   @TODO: 
